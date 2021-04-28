@@ -5,7 +5,7 @@
         <div class="col-md-6 col-sm-6 col-xs-12">
           <div class="form-group has-search">
             <input
-              v-model="filter"
+              v-model="searchText"
               type="text"
               class="form-control"
               placeholder="Search"
@@ -175,6 +175,12 @@
 import $ from "jquery";
 import VueApexCharts from "vue-apexcharts";
 
+let timeout;
+function debounce(func, wait) {
+  clearTimeout(timeout);
+  timeout = setTimeout(func, wait);
+}
+
 export default {
   name: "App",
   components: { apexchart: VueApexCharts },
@@ -193,6 +199,7 @@ export default {
         "Canada",
       ],
       filter: "",
+      searchText: "",
       country: "all",
       q1: true,
       q2: true,
@@ -212,6 +219,7 @@ export default {
           return e.country === this.country || this.country === "all";
         })
         .filter((e) => {
+          if (this.filter === "") return true;
           return Object.keys(e).some((p) => {
             return (
               e[p]
@@ -317,6 +325,11 @@ export default {
   watch: {
     filter() {
       this.page_number = 1;
+    },
+    searchText() {
+      debounce(() => {
+        this.filter = this.searchText;
+      }, 1000);
     },
   },
   mounted() {
